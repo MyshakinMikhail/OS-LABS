@@ -47,10 +47,7 @@ int main()
 		{
 			line[pos] = '\0';
 			if (pos == 0)
-			{
-				pos = 0;
 				continue;
-			}
 
 			char *start = line;
 			char *end;
@@ -64,7 +61,7 @@ int main()
 				if (!*start)
 					break;
 
-				float num = strtof(start, &end);
+				float num = strtof(start, &end); // считывает в num элементы, пока это цифры, остальное идет в end, например пробел или табчик
 				if (end == start)
 					break;
 

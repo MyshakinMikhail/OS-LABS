@@ -37,7 +37,7 @@ int main()
         fileName[n] = '\0';
     }
 
-    pid_t pid = fork();
+    pid_t pid = fork(); // вернет id процесса, если 0 - дочерний, > 0 - родительский
     if (pid < 0)
     {
         write(STDERR_FILENO, "fork error\n", 11);

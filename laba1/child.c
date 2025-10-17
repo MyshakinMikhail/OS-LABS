@@ -24,13 +24,10 @@ void FormatSum(float sum, char *out)
 
 	char buf[64];
 	if (sign)
-	{
 		snprintf(buf, sizeof(buf), "Сумма: -%d.%02d\n", intPart, fracPart);
-	}
 	else
-	{
 		snprintf(buf, sizeof(buf), "Сумма: %d.%02d\n", intPart, fracPart);
-	}
+
 	strcpy(out, buf);
 }
 
@@ -57,38 +54,38 @@ int main()
 
 			char *start = line;
 			char *end;
-			int count = 0;
-			float nums[3];
+			float sum = 0.0f;
+			int hasNumbers = 0;
 
-			while (*start && count < 3)
+			while (*start)
 			{
 				while (*start == ' ' || *start == '\t')
 					start++;
 				if (!*start)
 					break;
 
-				nums[count] = strtof(start, &end);
+				float num = strtof(start, &end);
 				if (end == start)
 					break;
-				count++;
+
+				sum += num;
+				hasNumbers = 1;
 				start = end;
 			}
 
-			if (count == 3)
+			if (hasNumbers)
 			{
-				float sum = nums[0] + nums[1] + nums[2];
 				char output[64];
 				FormatSum(sum, output);
 				write(STDOUT_FILENO, output, strlen(output));
 			}
+
 			pos = 0;
 		}
 		else
 		{
 			if (pos < BUFFER_SIZE - 1)
-			{
 				line[pos++] = c;
-			}
 		}
 	}
 

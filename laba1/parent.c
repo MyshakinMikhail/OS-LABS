@@ -10,8 +10,8 @@ const int BUFFER_SIZE = 256;
 
 int main()
 {
-    int pipeFd[2];
-    if (pipe(pipeFd) == -1)
+    int pipeFd[2]; // хранит дескрипторы: чтения и записи.
+    if (pipe(pipeFd) == -1) // создание канала для связи между процессами.
     {
         write(STDERR_FILENO, "pipe error\n", 11);
         exit(1);
@@ -37,7 +37,7 @@ int main()
         fileName[n] = '\0';
     }
 
-    pid_t pid = fork(); // вернет id процесса, если 0 - дочерний, > 0 - родительский
+    pid_t pid = fork(); //создание дочернего процесса, вернет id процесса, если 0 - дочерний, > 0 - родительский
     if (pid < 0)
     {
         write(STDERR_FILENO, "fork error\n", 11);
@@ -46,7 +46,7 @@ int main()
 
     if (pid == 0)
     {
-        close(pipeFd[0]);
+        close(pipeFd[0]); // закрывает поток чтения для дочернего процесса
 
         int fileFd = open(fileName, O_RDONLY);
         if (fileFd < 0)
@@ -57,7 +57,8 @@ int main()
             exit(1);
         }
 
-        if (dup2(fileFd, STDIN_FILENO) == -1)
+        if (dup2(fileFd, STDIN_FILENO) == -1) 
+        // копирует текущий дескриптор (но присваивает новый номер), который перенаправляет stdin в дочернем процессе на файл
         {
             write(STDERR_FILENO, "dup2 stdin error\n", 17);
             exit(1);
@@ -65,13 +66,17 @@ int main()
         close(fileFd);
 
         if (dup2(pipeFd[1], STDOUT_FILENO) == -1)
+        // копирует дескриптор , который перенаправляет stdout 
+        // в дочернем процессе на созданный нами канал pipe
+
         {
             write(STDERR_FILENO, "dup2 stdout error\n", 18);
             exit(1);
         }
         close(pipeFd[1]);
 
-        execl("./child", "child", NULL);
+        execl("./child", "child", NULL); // заменяет текущий выполняемый процесс программы на файл.
+        // здесь код выполняется, если произошла ошибки замены на файл.
         write(STDERR_FILENO, "execl failed\n", 14);
         exit(1);
     }

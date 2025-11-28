@@ -9,7 +9,6 @@ void write_str(const char *s)
 	WriteConsoleA(hOut, s, (DWORD)strlen(s), &written, NULL);
 }
 
-// ввод строки с консоли
 void read_line(char *buf, DWORD size)
 {
 	DWORD read;
@@ -25,7 +24,6 @@ void read_line(char *buf, DWORD size)
 	}
 }
 
-// парсинг float через strtof
 int parse_two_floats(const char *buf, float *f1, float *f2)
 {
 	char *end;

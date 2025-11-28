@@ -31,7 +31,6 @@ int main()
 
 		if (buf[0] == '0')
 		{
-			// переключение библиотеки
 			currentLib = (currentLib == lib1) ? lib2 : lib1;
 			cos_derivative = (cos_derivative_func)GetProcAddress(currentLib, "cos_derivative");
 			area = (area_func)GetProcAddress(currentLib, "area");

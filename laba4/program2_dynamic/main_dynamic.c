@@ -1,67 +1,74 @@
-#include <stdio.h>
 #include <windows.h>
+#include <stdio.h>
+#include "contract.h"
+#include "./../utils/utils.h"
 
-typedef float (*fn_derivative)(float, float);
-typedef float (*fn_area)(float, float);
-
-HMODULE lib = NULL;
-fn_derivative fder = NULL;
-fn_area farea = NULL;
-
-void load_library(const char *name)
-{
-	if (lib)
-		FreeLibrary(lib);
-
-	lib = LoadLibraryA(name);
-
-	if (!lib)
-	{
-		printf("Error loading %s\n", name);
-		exit(1);
-	}
-
-	fder = (fn_derivative)GetProcAddress(lib, "cos_derivative");
-	farea = (fn_area)GetProcAddress(lib, "area");
-
-	if (!fder || !farea)
-	{
-		printf("Invalid library: missing contracts\n");
-		exit(1);
-	}
-
-	printf("Loaded: %s\n", name);
-}
+#define BUF_SIZE 256
 
 int main()
 {
-	int state = 0;
-	load_library("libimpl1.dll");
+	HMODULE lib1 = LoadLibraryA("libimpl1.dll");
+	HMODULE lib2 = LoadLibraryA("libimpl2.dll");
+	if (!lib1 || !lib2)
+		return 1;
 
-	printf("Commands:\n"
-		   "0 -> switch implementation\n"
-		   "1 a dx -> cos_derivative(a, dx)\n"
-		   "2 a b -> area(a, b)\n");
+	HMODULE currentLib = lib1;
 
-	int cmd;
-	while (scanf("%d", &cmd) == 1)
+	cos_derivative_func cos_derivative = (cos_derivative_func)GetProcAddress(currentLib, "cos_derivative");
+	area_func area = (area_func)GetProcAddress(currentLib, "area");
+	if (!cos_derivative || !area)
+		return 2;
+
+	char buf[BUF_SIZE];
+	char out[BUF_SIZE];
+
+	write_str("Loaded: libimpl1.dll\n");
+	write_str("Commands:\n0 -> switch implementation\n1 a dx -> cos_derivative(a, dx)\n2 a b -> area(a, b)\n");
+
+	while (1)
 	{
-		if (cmd == 0)
+		read_line(buf, BUF_SIZE);
+
+		if (buf[0] == '0')
 		{
-			state ^= 1;
-			load_library(state ? "libimpl2.dll" : "libimpl1.dll");
+			// переключение библиотеки
+			currentLib = (currentLib == lib1) ? lib2 : lib1;
+			cos_derivative = (cos_derivative_func)GetProcAddress(currentLib, "cos_derivative");
+			area = (area_func)GetProcAddress(currentLib, "area");
+			snprintf(out, BUF_SIZE, "Loaded: %s\n", currentLib == lib1 ? "libimpl1.dll" : "libimpl2.dll");
+			write_str(out);
 		}
-		else if (cmd == 1)
+		else if (buf[0] == '1')
 		{
 			float a, dx;
-			scanf("%f %f", &a, &dx);
-			printf("Result = %f\n", fder(a, dx));
+			if (!parse_two_floats(buf + 2, &a, &dx))
+			{
+				write_str("Invalid input\n");
+				continue;
+			}
+			float res = cos_derivative(a, dx);
+			snprintf(out, BUF_SIZE, "Result = %f\n", res);
+			write_str(out);
 		}
-		else if (cmd == 2)
+		else if (buf[0] == '2')
 		{
 			float a, b;
-			scanf("%f %f", &a, &b);
-			printf("Result = %f\n", farea(a, b));
+			if (!parse_two_floats(buf + 2, &a, &b))
+			{
+				write_str("Invalid input\n");
+				continue;
+			}
+			float res = area(a, b);
+			snprintf(out, BUF_SIZE, "Result = %f\n", res);
+			write_str(out);
+		}
+		else
+		{
+			write_str("Unknown command\n");
 		}
 	}
+
+	FreeLibrary(lib1);
+	FreeLibrary(lib2);
+	return 0;
 }

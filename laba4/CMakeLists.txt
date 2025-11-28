@@ -9,7 +9,12 @@ set(CMAKE_C_STANDARD 11)
 include_directories(${CMAKE_SOURCE_DIR}/contracts)
 include_directories(${CMAKE_SOURCE_DIR}/lib_impl1)
 include_directories(${CMAKE_SOURCE_DIR}/lib_impl2)
+include_directories(${CMAKE_SOURCE_DIR}/utils)
 
+
+add_library(utils STATIC
+utils/utils.c
+)
 
 add_library(impl1 SHARED
 lib_impl1/impl1.c
@@ -24,7 +29,8 @@ set_target_properties(impl2 PROPERTIES OUTPUT_NAME "impl2")
 
 
 add_executable(program1_static program1_static/main_static.c)
-target_link_libraries(program1_static impl1)
+target_link_libraries(program1_static impl1 utils)
 
 
 add_executable(program2_dynamic program2_dynamic/main_dynamic.c)
+target_link_libraries(program2_dynamic utils)

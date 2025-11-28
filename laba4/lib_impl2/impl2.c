@@ -8,5 +8,5 @@ float cos_derivative(float a, float dx)
 
 float area(float a, float b)
 {
-	return (a * b) / 2.0f; // прямоугольный треугольник
-}												
+	return a * b / 2;
+}

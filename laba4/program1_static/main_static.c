@@ -1,31 +1,57 @@
-#include <stdio.h>
 #include "contract.h"
+#include <stdio.h>
+#include "./../utils/utils.h"
+
+#define BUF_SIZE 256
+
+extern float cos_derivative(float a, float dx);
+extern float area(float a, float b);
 
 int main()
 {
-	int cmd;
+	char buf[BUF_SIZE];
+	char out[BUF_SIZE];
 
-	printf("Commands:\n"
-		   "1 a dx -> cos_derivative(a, dx)\n"
-		   "2 a b -> area(a, b)\n"
-		   "0 -> exit\n");
+	write_str("Program 1 (static linking)\n");
+	write_str("Commands:\n0 -> exit\n1 a dx -> cos_derivative(a, dx)\n2 a b -> area(a, b)\n");
 
-	while (scanf("%d", &cmd) == 1)
+	while (1)
 	{
-		if (cmd == 0)
-			break;
+		read_line(buf, BUF_SIZE);
 
-		if (cmd == 1)
+		if (buf[0] == '0')
+		{
+			break;
+		}
+		else if (buf[0] == '1')
 		{
 			float a, dx;
-			scanf("%f %f", &a, &dx);
-			printf("Result = %f\n", cos_derivative(a, dx));
+			if (!parse_two_floats(buf + 2, &a, &dx))
+			{
+				write_str("Invalid input\n");
+				continue;
+			}
+			float res = cos_derivative(a, dx);
+			snprintf(out, BUF_SIZE, "Result = %f\n", res);
+			write_str(out);
 		}
-		else if (cmd == 2)
+		else if (buf[0] == '2')
 		{
 			float a, b;
-			scanf("%f %f", &a, &b);
-			printf("Result = %f\n", area(a, b));
+			if (!parse_two_floats(buf + 2, &a, &b))
+			{
+				write_str("Invalid input\n");
+				continue;
+			}
+			float res = area(a, b);
+			snprintf(out, BUF_SIZE, "Result = %f\n", res);
+			write_str(out);
+		}
+		else
+		{
+			write_str("Unknown command\n");
 		}
 	}
+
+	return 0;
 }
